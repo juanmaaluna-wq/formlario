@@ -1,7 +1,8 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
-<form id="miFormulario">
+<div class="container">
+    <form id="miFormulario">
     <div class="mb-3">
         <label for="nombre" class="form-label">Nombre:</label>
         <input type="text" class="form-control" id="nombre" placeholder="Ingrese su nombre">
@@ -15,153 +16,17 @@
     </div>
 
     <div class="mb-3">
-        <label for="email" class="form-label">Correo Electrónico:</label>
-        <input type="text" class="form-control" id="email" placeholder="Ingrese su correo electrónico">
-        <div id="emailError" class="form-text text-danger"></div>
-    </div>
-
-    <div class="mb-3">
         <label for="password" class="form-label">Contraseña</label>
         <div class="input-group">
             <input type="password" class="form-control" id="password">
             <button class="btn btn-outline-secondary" type="button" id="togglePassword">Mostrar</button>
         </div>
         <div id="passwordError" class="form-text text-danger"></div>
-        <div id="passwordStrength" class="form-text"></div>
-        <div id="passwordCount" class="form-text"></div>
     </div>
 
     <button type="submit" class="btn btn-primary">ENVIAR</button>
     <div id="formMessage" class="form-text"></div>
 </form>
+</div>
 
-<script>
-    let attempts = 0;
-    let locked = false;
-    let lockTimeout;
-
-    document.getElementById('miFormulario').addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        if (locked) {
-            document.getElementById('formMessage').innerText = 'Formulario bloqueado. Intente de nuevo en 30 segundos.';
-            return;
-        }
-
-        let nombre = document.getElementById('nombre').value;
-        let usuario = document.getElementById('usuario').value;
-        let email = document.getElementById('email').value;
-        let password = document.getElementById('password').value;
-
-        let nombreError = document.getElementById('nombreError');
-        let usuarioError = document.getElementById('usuarioError');
-        let emailError = document.getElementById('emailError');
-        let passwordError = document.getElementById('passwordError');
-        let formMessage = document.getElementById('formMessage');
-
-        nombreError.innerText = '';
-        usuarioError.innerText = '';
-        emailError.innerText = '';
-        passwordError.innerText = '';
-        formMessage.innerText = '';
-
-        let isValid = true;
-
-        function validateField(value, errorElement, fieldName, specialChars = true) {
-            if (value.length < 3) {
-                errorElement.innerText = `El ${fieldName} debe tener al menos 3 caracteres.`;
-                return false;
-            }
-
-            if (specialChars) {
-                const regex = /^[\d\s\-\.]+$/;
-                if (!regex.test(value)) {
-                    errorElement.innerText = `El ${fieldName} no debe contener caracteres especiales (aparte de guiones y puntos).`;
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        function validateEmail(email) {
-            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return regex.test(email);
-        }
-
-        function validatePasswordStrength(password) {
-            const length = password.length >= 8;
-            const hasSpecial = /[!@#$%^&*(),.?":{}|\u003c\u003e]/.test(password);
-            const hasNumber = /[0-9]/.test(password);
-            const hasLetter = /[a-zA-Z]/.test(password);
-
-            if (!length || !hasSpecial || !hasNumber || !hasLetter) {
-                return 'La contraseña debe tener al menos 8 caracteres, un número, una letra y un carácter especial.';
-            }
-            return '';
-        }
-
-        isValid = validateField(nombre, nombreError, 'Nombre');
-        isValid = validateField(usuario, usuarioError, 'Usuario');
-
-        if (!validateEmail(email)) {
-            emailError.innerText = 'Por favor, ingrese una dirección de correo electrónico válida.';
-            isValid = false;
-        }
-
-        const passwordStrengthError = validatePasswordStrength(password);
-        if (passwordStrengthError) {
-            passwordError.innerText = passwordStrengthError;
-            isValid = false;
-        }
-
-        if (isValid) {
-            formMessage.innerText = 'Formulario enviado correctamente.';
-            attempts = 0;
-            document.getElementById('miFormulario').reset();
-        } else {
-            attempts++;
-            if (attempts >= 3) {
-                locked = true;
-                disableForm();
-                formMessage.innerText = 'Demasiados intentos fallidos. Formulario bloqueado por 30 segundos.';
-                lockTimeout = setTimeout(() => {
-                    locked = false;
-                    enableForm();
-                    formMessage.innerText = '';
-                    attempts = 0;
-                }, 30000);
-            }
-        }
-    });
-
-    document.getElementById('togglePassword').addEventListener('click', function() {
-        const passwordInput = document.getElementById('password');
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        this.innerText = type === 'password' ? 'Mostrar' : 'Ocultar';
-    });
-
-    document.getElementById('password').addEventListener('input', function() {
-        const password = this.value;
-        document.getElementById('passwordCount').innerText = `Longitud de la contraseña: ${password.length} caracteres`;
-    });
-
-    function disableForm() {
-        document.getElementById('nombre').disabled = true;
-        document.getElementById('usuario').disabled = true;
-        document.getElementById('email').disabled = true;
-        document.getElementById('password').disabled = true;
-        document.querySelector('button[type="submit"]').disabled = true;
-        document.getElementById('togglePassword').disabled = true;
-    }
-
-    function enableForm() {
-        document.getElementById('nombre').disabled = false;
-        document.getElementById('usuario').disabled = false;
-        document.getElementById('email').disabled = false;
-        document.getElementById('password').disabled = false;
-        document.querySelector('button[type="submit"]').disabled = false;
-        document.getElementById('togglePassword').disabled = false;
-    }
-</script>
+<script src="validacion.js"></script>

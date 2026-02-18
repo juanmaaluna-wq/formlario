@@ -1,48 +1,60 @@
-let usuario = document.getElementById("usuario")
-let mensaje = document.getElementById("mensaje")
-let password = document.getElementById("password")
-let mensajePassword = document.createElement("div")
-mensajePassword.id = "mensajePassword"
-password.parentElement.appendChild(mensajePassword)
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    this.innerText = type === 'password' ? 'Mostrar' : 'Ocultar';
+});
 
-usuario.addEventListener("input",function(evento){
-   this.value = this.value.toLowerCase()
-   if(/[^a-z]/g.test(this.value)){
-      mensaje.textContent ="Esta tratando de ingresar un valor incorrecto"
-      this.style.borderColor = "red"
-      this.borderColor = "2px solid"
-   }
-   else if (this.value){
-      mensaje.textContent = "usuario correcto"
-   }
-   else{
-      mensaje.textContent ="campo requerido"
-       this.style.borderColor = "green"
-       this.borderColor = "2px solid"
-   }
-   this.value = this.value.replace(/[^a-z]/g,"")
+document.getElementById('miFormulario').addEventListener('submit', function(event) {
+    event.preventDefault();
 
-})
+    let nombre = document.getElementById('nombre').value;
+    let usuario = document.getElementById('usuario').value;
+    let password = document.getElementById('password').value;
 
-// Validación de contraseña
-password.addEventListener("input", function(evento) {
-   let longitud = this.value.length;
-   
-   if(longitud === 0) {
-      mensajePassword.textContent = "Campo requerido";
-      mensajePassword.style.color = "orange";
-      this.style.borderColor = "orange";
-   }
-   else if(longitud < 10) {
-      mensajePassword.textContent = "✗ Contraseña inválida (mínimo 10 caracteres)";
-      mensajePassword.style.color = "red";
-      this.style.borderColor = "red";
-      this.style.borderWidth = "2px";
-   }
-   else {
-      mensajePassword.textContent = "✓ Contraseña válida";
-      mensajePassword.style.color = "green";
-      this.style.borderColor = "green";
-      this.style.borderWidth = "2px";
-   }
-})
+    let nombreError = document.getElementById('nombreError');
+    let usuarioError = document.getElementById('usuarioError');
+    let passwordError = document.getElementById('passwordError');
+    let formMessage = document.getElementById('formMessage');
+
+    nombreError.innerText = '';
+    usuarioError.innerText = '';
+    passwordError.innerText = '';
+    formMessage.innerText = '';
+
+    let isValid = true;
+
+    function validateField(value, errorElement, fieldName) {
+        if (value.length < 3) {
+            errorElement.innerText = `El ${fieldName} debe tener al menos 3 caracteres.`;
+            return false;
+        }
+
+        const regex = /^[\d\s\-\.]+$/;
+        if (!regex.test(value)) {
+            errorElement.innerText = `El ${fieldName} no debe contener caracteres especiales (aparte de guiones y puntos).`;
+            return false;
+        }
+
+        return true;
+    }
+
+    isValid = validateField(nombre, nombreError, 'Nombre');
+
+    if (!validateUsuario(usuario)) {
+        usuarioError.innerText = 'El nombre de usuario no es válido.';
+        isValid = false;
+    }
+
+    isValid = validateField(usuario, usuarioError, 'Usuario');
+    isValid = validateField(password, passwordError, 'Contraseña');
+
+    if (isValid) {
+        formMessage.innerText = 'Formulario enviado correctamente.';
+        document.getElementById('miFormulario').reset();
+    }
+});
+
+function validateUsuario(usuario) {
+    return usuario.length >= 5; 
+}
